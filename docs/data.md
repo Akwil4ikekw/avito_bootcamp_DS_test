@@ -1,9 +1,6 @@
 # Данные для повторения решения
 
-Папка автора: [Google Drive](https://drive.google.com/drive/folders/1G5tqSNlCG89dKWfuCzvM4TkXhgPvkCPc?usp=sharing).
-Автор добавляет ZIP с сохранёнными данными. На момент обновления документации
-имя, размер и контрольная сумма архива ещё не зафиксированы; загрузка и доступ
-по ссылке не подтверждены. Ссылка на папку сама по себе не гарантирует доступ.
+Папка автора: [Google Drive](https://drive.google.com/drive/folders/1G5tqSNlCG89dKWfuCzvM4TkXhgPvkCPc?usp=sharing). Загружена часть, потому что 21 ГБ данных не влез на Google Drive. В рашении представлен способ получений данных.
 
 ## Для получения submission
 
