@@ -1,0 +1,12 @@
+-r requirements.txt
+h5py==3.16.0
+huggingface_hub==1.33.0
+scikit-learn==1.9.1
+scipy==1.17.1
+opencv-contrib-python==4.10.0.84
+prettytable==3.18.0
+ujson==6.0.0
+visualdl==2.5.3
+gast==0.3.3
+faiss-cpu==1.15.1
+easydict==1.13

@@ -1,0 +1,8 @@
+# Python 3.12. Install Paddle CPU or GPU separately as described in README.
+numpy==1.26.4
+pandas==3.0.6
+Pillow==12.1.0
+PyYAML==6.0.2
+tqdm==4.70.1
+# This source commit is the version actually used in the working environment.
+paddlex[base] @ git+https://github.com/PaddlePaddle/PaddleX.git@ffb64904d23708863ff5b8da312a5cbd52a7f462

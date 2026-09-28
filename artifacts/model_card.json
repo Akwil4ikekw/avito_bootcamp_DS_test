@@ -1,0 +1,45 @@
+{
+  "version": "final_pplcnet_x1_ru_en_v1",
+  "frozen_on": "2026-09-28",
+  "model_name": "PP-LCNet_x1_0_textline_ori",
+  "experiment": "exp_04_pplcnet_x1_textline_finetune_ru_en",
+  "checkpoint_epoch": 10,
+  "checkpoint_selected_by": "synthetic validation top-1 accuracy",
+  "checkpoint_sha256": "35db7515c68001f4a9e06d8abf024100611b03dfcda35e027f91f7dbbd8e779e",
+  "export_sha256": {
+    "inference.json": "2fe6b66139c949a0dd33ca5728af672156f7bc3f96a051c5e161b7f5fe195e87",
+    "inference.pdiparams": "02f269ccec92d41269f3cf99640e7b669cf6646f3479598ca2ed184d7e9c5c06",
+    "inference.yml": "8d5120d0e1a30a9df7ed46aa9119da3796ed066777089d1c1d705f132d5e90f9"
+  },
+  "training": {
+    "train_base_images": 60520,
+    "train_paired_images": 121040,
+    "validation_base_images": 10635,
+    "seed": 42,
+    "languages": [
+      "ru",
+      "en"
+    ],
+    "epochs": 10
+  },
+  "validation": {
+    "validation_samples": 21270,
+    "accuracy": 0.9937000470145745,
+    "brier": 0.004570659359081818,
+    "1_minus_brier": 0.9954293406409181,
+    "mean_p180": 0.5001292721137398,
+    "elapsed_seconds": 24.072599911130965,
+    "images_per_second": 883.5771822953337,
+    "probability_extraction": "per-image label_names (class_ids batch matrix ignored)",
+    "full_manifest": true
+  },
+  "test": {
+    "rows": 20000,
+    "user_reported_1_minus_brier": 0.90386951,
+    "user_reported_brier": 0.09613049,
+    "prediction_file": "submission.csv",
+    "prediction_sha256": "a1b8f37980b35b76dc4b50d39cf40cfb30624e2cb34fa8fc22bfa9a50be0a41d",
+    "labels_available_locally": false
+  },
+  "postprocessing": "Original model probabilities. Hard 0.5 threshold is a separate alternative only."
+}

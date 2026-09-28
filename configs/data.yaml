@@ -1,0 +1,17 @@
+# Revision recovered from the local Hugging Face download metadata for BOTH shards.
+# The saved dataset provides authoritative crop bytes and original splits.
+repo_id: nvidia/OCR-Synthetic-Multilingual-v1
+revision: 69696a1cc543ef3a0f8e9892a89c17293e915263
+files:
+  ru: ru/train/train_000.h5
+  en: en/train/train_000.h5
+raw_dir: data/raw
+processed_dir: data/processed/line_crops
+n_per_language: 40000
+max_lines_per_page: 3
+min_crop_width: 10
+min_crop_height: 8
+png_compress_level: 3
+min_aspect_ratio: 1.0
+validation_size: 0.15
+seed: 42

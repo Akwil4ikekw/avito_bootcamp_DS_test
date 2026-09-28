@@ -1,0 +1,11 @@
+{
+  "validation_samples": 21270,
+  "accuracy": 0.9937000470145745,
+  "brier": 0.004570659359081818,
+  "1_minus_brier": 0.9954293406409181,
+  "mean_p180": 0.5001292721137398,
+  "elapsed_seconds": 24.072599911130965,
+  "images_per_second": 883.5771822953337,
+  "probability_extraction": "per-image label_names (class_ids batch matrix ignored)",
+  "full_manifest": true
+}

@@ -1,0 +1,124 @@
+# Paths are relative to the repository root (--root can override it).
+# The vendor repositories and pretrained checkpoint are external inputs, not APIs.
+model_name: PP-LCNet_x1_0_textline_ori
+paddlex_commit: ffb64904d23708863ff5b8da312a5cbd52a7f462
+paddleclas_commit: f1233c18455b8acde4fc42ab0bea575fa06daa8e
+paddlex_dir: vendor/PaddleX
+paddleclas_dir: vendor/PaddleX/paddlex/repo_manager/repos/PaddleClas
+pretrained_weights: artifacts/pretrained/PP-LCNet_x1_0_textline_ori_pretrained.pdparams
+dataset_dir: data/paddlex_textline_orientation
+train_metadata: data/processed/line_crops/train.csv
+validation_metadata: data/processed/line_crops/validation.csv
+output_dir: experiments/exp_04_pplcnet_x1_textline_finetune_ru_en
+
+physical_gpu_id: 5
+max_existing_gpu_memory_mb: 1024
+seed: 42
+epochs: 10
+batch_size: 64
+learning_rate: 0.05
+warmup_epochs: 1
+train_workers: 16
+validation_workers: 8
+use_shared_memory: true
+
+# This recipe preserves the completed experiment. ResizeImage size is [W, H].
+# Checkpoint selection uses validation accuracy, not Brier score.
+paddleclas:
+  Arch:
+    name: PPLCNet_x1_0
+    class_num: 2
+    pretrained: false
+    use_ssld: false
+    stride_list: [2, [2, 1], [2, 1], [2, 1], [2, 1]]
+  Global:
+    checkpoints: null
+    device: gpu
+    epochs: 10
+    eval_during_train: true
+    eval_interval: 1
+    export_with_pir: true
+    image_shape: [3, 80, 160]
+    pdx_model_name: PP-LCNet_x1_0_textline_ori
+    print_batch_step: 10
+    save_inference_dir: ./inference
+    save_interval: 1
+    seed: 42
+    start_eval_epoch: 1
+    to_static: false
+    uniform_output_enabled: true
+    use_dali: false
+    use_visualdl: true
+  DataLoader:
+    Train:
+      dataset:
+        name: ClsDataset
+        transform_ops:
+          - DecodeImage: {channel_first: false, to_rgb: true}
+          - ResizeImage: {size: [160, 80]}
+          - TimmAutoAugment:
+              config_str: rand-m9-mstd0.5-inc1
+              img_size: [160, 80]
+              interpolation: bicubic
+              prob: 1.0
+          - NormalizeImage:
+              mean: [0.485, 0.456, 0.406]
+              std: [0.229, 0.224, 0.225]
+              scale: 1.0/255.0
+              order: ''
+          - RandomErasing:
+              EPSILON: 0.0
+              attempt: 10
+              mode: pixel
+              r1: 0.3
+              sh: 1.0/3.0
+              sl: 0.02
+              use_log_aspect: true
+      loader: {num_workers: 16, use_shared_memory: true}
+      sampler:
+        name: DistributedBatchSampler
+        batch_size: 64
+        drop_last: false
+        shuffle: true
+    Eval:
+      dataset:
+        name: ClsDataset
+        transform_ops:
+          - DecodeImage: {channel_first: false, to_rgb: true}
+          - ResizeImage: {size: [160, 80]}
+          - NormalizeImage:
+              mean: [0.485, 0.456, 0.406]
+              std: [0.229, 0.224, 0.225]
+              scale: 1.0/255.0
+              order: ''
+      loader: {num_workers: 8, use_shared_memory: true}
+      sampler:
+        name: DistributedBatchSampler
+        batch_size: 32
+        drop_last: false
+        shuffle: false
+  Loss:
+    Train: [{CELoss: {weight: 1.0}}]
+    Eval: [{CELoss: {weight: 1.0}}]
+  Metric:
+    Train: [{TopkAcc: {topk: [1, 2]}}]
+    Eval: [{TopkAcc: {topk: [1, 2]}}]
+  Optimizer:
+    name: Momentum
+    momentum: 0.9
+    regularizer: {name: L2, coeff: 1.0e-5}
+    lr: {name: Cosine, learning_rate: 0.05, warmup_epoch: 1}
+  Infer:
+    batch_size: 10
+    infer_imgs: deploy/images/PULC/textline_orientation/textline_orientation_test_0_0.png
+    transforms:
+      - DecodeImage: {channel_first: false, to_rgb: true}
+      - ResizeImage: {size: [160, 80]}
+      - NormalizeImage:
+          mean: [0.485, 0.456, 0.406]
+          std: [0.229, 0.224, 0.225]
+          scale: 1.0/255.0
+          order: ''
+      - ToCHWImage: null
+    PostProcess: {name: Topk, topk: 1}
+  profiler_options: null
