@@ -1,6 +1,6 @@
 # Данные для повторения решения
 
-Папка автора: [Google Drive](https://drive.google.com/drive/folders/1G5tqSNlCG89dKWfuCzvM4TkXhgPvkCPc?usp=sharing). Загружена часть, потому что 21 ГБ данных не влез на Google Drive. В рашении представлен способ получений данных.
+Папка автора: [Mega](https://mega.nz/file/62JByRLB#eKBOmiyhrRBBeTHYG6ffNPAlvxYenLWYT0Q8q6OZiTM). Загружена часть, потому что 21 ГБ данных не влез на Google Drive. В рашении представлен способ получений данных. Я указал на Stepik другую ссылку, потому что не увидел, что там ограничение 15ГБ, а мой датасет 21.
 
 ## Для получения submission
 

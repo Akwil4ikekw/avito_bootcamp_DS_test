@@ -22,7 +22,8 @@ import sys
 from typing import Any
 
 import yaml
-
+"""В Данном файле происходит дообучение PP-LCNet_x1_0_textline_ori на
+     сгенерированной синтетике русского и английского языков."""
 
 MODEL_NAME = "PP-LCNet_x1_0_textline_ori"
 MODEL_CONFIG_RELATIVE = (
