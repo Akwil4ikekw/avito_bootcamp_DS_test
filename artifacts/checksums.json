@@ -1,8 +1,0 @@
-{
-  "artifacts/model/inference.json": "2fe6b66139c949a0dd33ca5728af672156f7bc3f96a051c5e161b7f5fe195e87",
-  "artifacts/model/inference.pdiparams": "02f269ccec92d41269f3cf99640e7b669cf6646f3479598ca2ed184d7e9c5c06",
-  "artifacts/model/inference.yml": "8d5120d0e1a30a9df7ed46aa9119da3796ed066777089d1c1d705f132d5e90f9",
-  "artifacts/checkpoint/final_weights.pdparams": "35db7515c68001f4a9e06d8abf024100611b03dfcda35e027f91f7dbbd8e779e",
-  "artifacts/pretrained/PP-LCNet_x1_0_textline_ori_pretrained.pdparams": "d8c7c36f12aad2ffdc45669cc02b23b844f5b1c99a05fe9511ab7f60e7b0b317",
-  "submission.csv": "a1b8f37980b35b76dc4b50d39cf40cfb30624e2cb34fa8fc22bfa9a50be0a41d"
-}
