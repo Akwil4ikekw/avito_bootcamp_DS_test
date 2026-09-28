@@ -130,6 +130,8 @@ def extract_line_crops(h5_path: Path, language: str, config: dict, root: Path, w
                 image = page_image.convert("RGB")
             annotation = decode_annotation(h5_file["annotations"][page_idx])
             lines = annotation["line_bboxes"]
+            # Несколько строк с каждой случайно выбранной страницы увеличивают
+            # разнообразие фонов и оформления при фиксированном числе кропов.
             line_indices = rng.permutation(len(lines))[:int(config["max_lines_per_page"])]
             for line_idx in line_indices:
                 line = lines[int(line_idx)]
@@ -179,6 +181,7 @@ def extract(config: dict, root: Path) -> Path:
 
 
 def filter_metadata(config: dict, root: Path) -> Path:
+    """Отфильтровать метаданные по геометрии, сохранив исходные PNG и отказы."""
     processed_dir = root_path(root, config["processed_dir"])
     filtered_path, rejected_path = (processed_dir / name for name in ("metadata_filtered.csv", "rejected_vertical.csv"))
     refuse_existing([filtered_path, rejected_path])
@@ -186,6 +189,8 @@ def filter_metadata(config: dict, root: Path) -> Path:
     if ((frame["height"] <= 0) | (frame["width"] <= 0)).any():
         raise ValueError("Crop dimensions must be positive.")
     frame["aspect_ratio"] = frame["width"] / frame["height"]
+    # width/height < 1 означает высокий узкий бокс, а не доказательство направления
+    # текста. Это ограничение выбранной обучающей выборки, не детектор ориентации.
     reject = frame["aspect_ratio"] < float(config["min_aspect_ratio"])
     frame.loc[~reject].to_csv(filtered_path, index=False)
     frame.loc[reject].to_csv(rejected_path, index=False)
@@ -194,6 +199,7 @@ def filter_metadata(config: dict, root: Path) -> Path:
 
 
 def add_content_type(frame: pd.DataFrame) -> pd.DataFrame:
+    """Добавить срезы для анализа ошибок; это не целевые метки ориентации."""
     frame = frame.copy()
     text = frame["text"].fillna("").astype(str)
     letters = text.str.contains(r"[A-Za-zА-Яа-яЁё]", regex=True)
@@ -205,15 +211,20 @@ def add_content_type(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def split_metadata(config: dict, root: Path) -> tuple[Path, Path]:
+    """Сделать один воспроизводимый holdout без общих исходных страниц."""
     from sklearn.model_selection import GroupShuffleSplit
 
     processed_dir = root_path(root, config["processed_dir"])
     train_path, validation_path = processed_dir / "train.csv", processed_dir / "validation.csv"
     refuse_existing([train_path, validation_path])
     frame = add_content_type(pd.read_csv(processed_dir / "metadata_filtered.csv"))
+    # Номера страниц повторяются в ru/en, поэтому идентификатор включает язык.
+    # Все кропы одной страницы должны оставаться вместе: у них общие фон/шрифт.
     frame["group_id"] = frame["language"] + "_" + frame["source_page_id"].astype(str)
     train_parts, validation_parts = [], []
     for _, language_frame in frame.groupby("language"):
+        # Делим отдельно каждый язык, чтобы оба были представлены в holdout.
+        # test_size задаёт долю групп (страниц); доля строк может немного отличаться.
         splitter = GroupShuffleSplit(n_splits=1, test_size=float(config["validation_size"]), random_state=int(config["seed"]))
         train_index, val_index = next(splitter.split(language_frame, groups=language_frame["group_id"]))
         train_parts.append(language_frame.iloc[train_index])

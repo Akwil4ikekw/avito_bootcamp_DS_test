@@ -1,0 +1,45 @@
+{
+  "source": "Aggregated saved reports of the completed zero-shot experiments; not a new inference run.",
+  "dataset": "The same synthetic group-disjoint holdout used for fine-tune validation",
+  "base_images": 10635,
+  "evaluated_views": 21270,
+  "experiments": [
+    {
+      "model": "PP-LCNet_x0_25_textline_ori",
+      "fine_tuned": false,
+      "accuracy": 0.866807710390221,
+      "brier": 0.10450486988144402,
+      "1_minus_brier": 0.895495130118556,
+      "organizer_test_1_minus_brier": null
+    },
+    {
+      "model": "PP-LCNet_x1_0_textline_ori",
+      "fine_tuned": false,
+      "accuracy": 0.8693464974141984,
+      "brier": 0.10506880391917298,
+      "1_minus_brier": 0.894931196080827,
+      "organizer_test_1_minus_brier": 0.85088864,
+      "test_score_source": "Organizer feedback reported by the author; no test labels available locally",
+      "by_language": {
+        "en": {
+          "count": 10734,
+          "accuracy": 0.9298490776970374,
+          "brier": 0.056076038761496326,
+          "1_minus_brier": 0.9439239612385036
+        },
+        "ru": {
+          "count": 10536,
+          "accuracy": 0.8077069096431283,
+          "brier": 0.15498227593915223,
+          "1_minus_brier": 0.8450177240608477
+        }
+      },
+      "ru_alphanumeric": {
+        "count": 1556,
+        "accuracy": 0.6246786632390745,
+        "brier": 0.32083715508544836,
+        "1_minus_brier": 0.6791628449145517
+      }
+    }
+  ]
+}

@@ -16,9 +16,12 @@ import pandas as pd
 
 
 def probability_180(result):
+    """Вернуть вероятность именно класса 180°, независимо от порядка top-k."""
     response = result.get('res', result)
     scores = np.asarray(response['scores'], dtype=float).reshape(-1)
     labels = list(response.get('label_names', []))
+    # class_ids здесь не используем: в PaddleX 3.7.2 это может быть матрица
+    # всего батча, а label_names и scores относятся к текущему изображению.
     if len(labels) != 2 or len(scores) != 2 or set(labels) != {'0_degree', '180_degree'}:
         raise ValueError('Expected two per-image scores and labels for 0/180 degrees')
     if not np.isfinite(scores).all() or not ((scores >= 0) & (scores <= 1)).all():
@@ -41,6 +44,8 @@ def predict_paths(predictor, paths, batch_size, description):
     probabilities = []
     for start in tqdm(range(0, len(paths), batch_size), desc=description):
         batch = paths[start:start + batch_size]
+        # Нужны обе вероятности, а не только уверенность в победившем классе.
+        # Порядок top-k меняется от картинки к картинке; его разберёт probability_180.
         results = list(predictor.predict(batch, batch_size=len(batch), topk=2))
         if len(results) != len(batch):
             raise RuntimeError('Prediction count does not match input count')
@@ -52,6 +57,7 @@ def predict_paths(predictor, paths, batch_size, description):
 
 
 def evaluate(predictor, manifest, root, metadata_path, output_dir, batch_size, limit):
+    """Оценить вероятности на размеченном holdout, не на скрытом тесте."""
     records = [line.rsplit(' ', 1) for line in manifest.read_text(encoding='utf-8').splitlines() if line.strip()]
     if limit is not None:
         records = records[:limit]
@@ -73,6 +79,8 @@ def evaluate(predictor, manifest, root, metadata_path, output_dir, batch_size, l
             raise ValueError('Metadata filenames must be unique')
         types = metadata.set_index('filename')['content_type'].to_dict()
         frame['content_type'] = frame['image_path'].map(lambda value: types.get(Path(value).name, 'unknown'))
+    # Brier оценивает исходные вероятности, accuracy — классы после порога 0.5.
+    # Округление перед Brier потеряло бы информацию об уверенности модели.
     frame['squared_error'] = (frame['p_180'] - frame['target']) ** 2
     frame['correct'] = (frame['p_180'] >= .5).astype(int) == frame['target']
     metrics = {
@@ -103,6 +111,7 @@ def evaluate(predictor, manifest, root, metadata_path, output_dir, batch_size, l
 
 
 def make_submission(predictor, sample_path, images_dir, output, batch_size):
+    """Сохранить p_180 с теми же идентификаторами и порядком, что в образце."""
     if output.exists():
         raise FileExistsError(f'Refusing to overwrite an existing submission: {output}')
     sample = pd.read_csv(sample_path, dtype={'image_id': str})
@@ -120,6 +129,8 @@ def make_submission(predictor, sample_path, images_dir, output, batch_size):
     started = perf_counter()
     probabilities = predict_paths(predictor, paths, batch_size, 'Test')
     elapsed = perf_counter() - started
+    # Значения p_180 из sample_submission — заглушки, а не известные ответы.
+    # Поэтому используем только image_id и не вычисляем здесь тестовый Brier.
     submission = sample[['image_id']].copy()
     submission['p_180'] = probabilities
     assert len(submission) == len(sample) and np.isfinite(probabilities).all()
@@ -154,12 +165,15 @@ def main():
         parser.error('--validation-root is required with --validation-manifest')
     if not args.sample and not args.validation_manifest:
         parser.error('Supply test sample/images or validation manifest')
+    # Устройство выбираем до импорта Paddle: выбранная физическая GPU станет gpu:0.
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.physical_gpu_id) if args.device == 'gpu' else ''
     import paddlex
     model_dir = args.model_dir.resolve()
     for filename in ['inference.json', 'inference.pdiparams', 'inference.yml']:
         if not (model_dir / filename).is_file():
             raise FileNotFoundError(model_dir / filename)
+    # Resize, RGB-нормализация (ImageNet mean/std) и метки берутся из inference.yml.
+    # Новые фильтры/ручной resize здесь не добавляем: вход должен совпадать с экспортом.
     predictor = paddlex.create_predictor(
         model_name='PP-LCNet_x1_0_textline_ori', model_dir=str(model_dir),
         device='gpu:0' if args.device == 'gpu' else 'cpu', topk=2,

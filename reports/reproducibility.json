@@ -1,0 +1,40 @@
+{
+  "checked_on": "2026-09-28",
+  "scope": "Full inference rerun on all 20000 test images, using the frozen exported model. No retraining or use of test labels.",
+  "environment": {
+    "python": "3.12",
+    "paddle": "3.3.0",
+    "paddlex_commit": "ffb64904d23708863ff5b8da312a5cbd52a7f462",
+    "gpu_build_cuda": "12.6",
+    "gpu": "NVIDIA RTX A4000",
+    "batch_size": 128,
+    "cpu_thread_limits": {"OMP_NUM_THREADS": 2, "MKL_NUM_THREADS": 2, "OPENBLAS_NUM_THREADS": 2}
+  },
+  "reference": {
+    "file": "submission.csv",
+    "rows": 20000,
+    "sha256": "a1b8f37980b35b76dc4b50d39cf40cfb30624e2cb34fa8fc22bfa9a50be0a41d"
+  },
+  "gpu_rerun": {
+    "physical_gpu_id": 5,
+    "rows": 20000,
+    "same_image_ids_and_order": true,
+    "sha256": "a1b8f37980b35b76dc4b50d39cf40cfb30624e2cb34fa8fc22bfa9a50be0a41d",
+    "byte_identical": true,
+    "max_abs_probability_difference": 0.0,
+    "mean_abs_probability_difference": 0.0,
+    "different_probabilities": 0,
+    "changed_classes_at_0_5": 0
+  },
+  "cpu_rerun": {
+    "rows": 20000,
+    "same_image_ids_and_order": true,
+    "sha256": "582a03336c67d9dce987f1182c223ac1af8e289790ed6db1558358d31a2a6539",
+    "byte_identical": false,
+    "max_abs_probability_difference": 0.000020027000000033546,
+    "mean_abs_probability_difference": 0.00000008101682550001733,
+    "different_probabilities": 161,
+    "changed_classes_at_0_5": 0
+  },
+  "interpretation": "Exact GPU reproduction is verified in the original environment. CPU numerical equivalence is close but not bit-for-bit. Exact matching on arbitrary hardware, drivers, dependency versions or after retraining is not claimed. The notebook compares new predictions to the original CSV; it does not substitute the stored answer for inference."
+}

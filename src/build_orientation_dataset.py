@@ -14,6 +14,7 @@ from prepare_data import root_path, source_image_path
 
 
 def build_dataset(root: Path, processed_dir: Path, output_dir: Path, seed: int = 42) -> dict:
+    """Создать две ориентации каждого кропа внутри уже заданного разбиения."""
     root, processed_dir, output_dir = root.resolve(), processed_dir.resolve(), output_dir.resolve()
     if output_dir.exists():
         raise FileExistsError(f"Refusing to overwrite or merge dataset: {output_dir}")
@@ -30,6 +31,8 @@ def build_dataset(root: Path, processed_dir: Path, output_dir: Path, seed: int =
             if any(char.isspace() for char in path.relative_to(processed_dir).as_posix()):
                 raise ValueError("PaddleClas space-separated manifests require paths without whitespace.")
         sources[split] = paths
+    # Сначала делим исходные страницы, и только потом создаём перевёрнутые копии.
+    # Иначе одна строка или соседние строки страницы могли бы попасть в оба сплита.
     if set(frames["train"]["group_id"]) & set(frames["val"]["group_id"]):
         raise ValueError("Train/validation contain shared source pages.")
     if set(sources["train"]) & set(sources["val"]):
@@ -46,8 +49,12 @@ def build_dataset(root: Path, processed_dir: Path, output_dir: Path, seed: int =
             rotated.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, upright)
             with Image.open(path) as image:
+                # Точный поворот на 180° переставляет пиксели без интерполяции.
+                # Исходный синтетический кроп считаем upright; метку 1 создаём сами.
                 image.transpose(Image.Transpose.ROTATE_180).save(rotated, format="PNG", compress_level=3)
             records.extend([(upright.relative_to(output_dir).as_posix(), 0), (rotated.relative_to(output_dir).as_posix(), 1)])
+        # Парное создание даёт точный баланс 50/50, а не случайное число классов.
+        # Seed фиксирует порядок записей; сами метки остаются известными и неизменными.
         np.random.default_rng(seed if split == "train" else seed + 1).shuffle(records)
         (output_dir / f"{split}.txt").write_text("".join(f"{path} {label}\n" for path, label in records), encoding="utf-8")
         summary["splits"][split] = {"base_images": len(paths), "views": len(records), "class_0": len(paths), "class_1": len(paths)}
